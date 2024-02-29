@@ -12,7 +12,7 @@ import {
   Heading,
   Button,
 } from "@chakra-ui/react";
-const BoardDetails = () => {
+const BoardDetails = ({listId}) => {
   const [boardDetails, setBoardDetails] = useState([]);
   const [listName, setListName] = useState("");
   const myApiKey = import.meta.env.VITE_API_KEY;
@@ -25,13 +25,18 @@ const BoardDetails = () => {
     console.log(res.data);
     setBoardDetails(res.data);
   }
-  async function handlingDeleteTheList() {
+  async function handlingDeleteTheList(listId) {
+    
     const res = await axios.put(
-      `https://api.trello.com/1/lists/${id}/closed?key=${myApiKey}&token=${myToken}`
+      `https://api.trello.com/1/lists/${listId}/closed?key=${myApiKey}&token=${myToken}&value=true`
     );
+    const data = res.data;
+    console.log(data);
+    setBoardDetails(boardDetails.filter(({id})=> id !== data.id ));
+
     console.log(res);
   }
-  console.log(boardDetails.length);
+  console.log(boardDetails);
   async function addNewList() {
     const res = await axios.post(
       `https://api.trello.com/1/boards/${id}/lists?name=${listName}&key=${myApiKey}&token=${myToken}`
@@ -44,14 +49,14 @@ const BoardDetails = () => {
   }, []);
   return (
     <Flex scrollBehavior={"inherit"}>
-      {boardDetails.map(({ name }) => (
+      {boardDetails.map(({ name , id}) => (
         <>
           <Box>
             <Card>
               <CardHeader>
                 <Flex justifyContent={"space-between"}>
                   <Heading size="md"> {name} </Heading>
-                  <Button  onClick={handlingDeleteTheList}>
+                  <Button  onClick={()=>handlingDeleteTheList(id)}>
                     Delete
                   </Button>
                 </Flex>
@@ -66,6 +71,7 @@ const BoardDetails = () => {
               </CardFooter>
             </Card>
           </Box>
+
         </>
       ))}
 
