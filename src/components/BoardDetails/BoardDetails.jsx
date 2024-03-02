@@ -22,13 +22,11 @@ const BoardDetails = ({ listId }) => {
   const myApiKey = import.meta.env.VITE_API_KEY;
   const myToken = import.meta.env.VITE_TOKEN;
   const { id } = useParams();
-  console.log(myToken, myApiKey);
-  // console.log(listName);
+ 
   async function fetchBoardDetails(id) {
     const res = await axios.get(
       `https://api.trello.com/1/boards/${id}/lists?key=${myApiKey}&token=${myToken}`
     );
-    console.log(res.data);
     setBoardDetails(res.data);
   }
 
@@ -37,19 +35,16 @@ const BoardDetails = ({ listId }) => {
       `https://api.trello.com/1/lists/${listId}/closed?key=${myApiKey}&token=${myToken}&value=true`
     );
     const data = res.data;
-    console.log(data);
     setBoardDetails(boardDetails.filter(({ id }) => id !== data.id));
 
-    console.log(res);
   }
-  console.log(boardDetails);
-
+ 
 
   async function addNewList() {
     const res = await axios.post(
       `https://api.trello.com/1/boards/${id}/lists?name=${listName}&key=${myApiKey}&token=${myToken}`
     );
-    console.log(res.data);
+  
     setBoardDetails([...boardDetails, res.data]);
     // setBoardDetails([res.data, ...boardDetails]);
   }
@@ -58,10 +53,10 @@ const BoardDetails = ({ listId }) => {
   }, []);
   return (
     <Box background={"#878deb33"} minH={"100vh"} paddingTop={'50px'}>
+      <Box width={'90%'} margin={'auto'}>
       <Flex scrollBehavior={"inherit"} gap={"20px"} flexWrap={'wrap'}>
         {boardDetails.map((curr) => (
           <>
-          {/* <h1>{curr}</h1> */}
             <Flex>
               <Card height="fit-content">
                 <CardHeader>
@@ -90,6 +85,8 @@ const BoardDetails = ({ listId }) => {
           </CardFooter>
         </Card>
       </Flex>
+      </Box>
+    
     </Box>
   );
 };
