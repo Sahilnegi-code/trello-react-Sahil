@@ -4,7 +4,9 @@ import Navbar from "./components/Navbar/Navbar";
 import Boards from "./components/Boards/Boards";
 import BoardDetails from "./components/BoardDetails/BoardDetails";
 import axios from "axios";
-import { BrowserRouter , Route , Routes } from "react-router-dom";
+import { useParams } from "react-router-dom";
+
+import { BrowserRouter , Route , Routes   } from "react-router-dom";
 
 export const themeContext = createContext(null);
 
@@ -12,6 +14,8 @@ export const themeContext = createContext(null);
 const Project = () => {
   const [boardName , setBoardName ] = useState("")
   const [boardData, setBoardData] = useState([]);
+  const [loading , setLoading] = useState(false);
+  const [toggleCreateBoard , setToggleCreateBoard] = useState(true);
   const myApiKey = import.meta.env.VITE_API_KEY;
   const myToken = import.meta.env.VITE_TOKEN;
   function handlingBoardName(event){ 
@@ -23,6 +27,8 @@ const Project = () => {
         `https://api.trello.com/1/members/me/boards?key=${myApiKey}&token=${myToken}`
       );
       setBoardData(res.data);
+      setLoading(true);
+      setToggleCreateBoard(true)
     }
      
   async function addInTheBoard(){
@@ -40,12 +46,13 @@ const Project = () => {
     < themeContext.Provider value={{ handlingBoardName,addInTheBoard , fetchTheBoards,boardData}} >     
 
     <Box>
-      <Navbar/>
+    <Navbar  toggleCreateBoard = {toggleCreateBoard} />
+
       <Routes>
-        <Route path="/" element={<Boards/>} />
+        <Route path="/" element = { <Boards setToggleCreateBoard ={setToggleCreateBoard} loading={loading}/>} />
         <Route path="/boards" >
-        <Route index element={<Boards />} />
-        <Route  path=':id' element={< BoardDetails />}  />
+        <Route   index element={<Boards setToggleCreateBoard ={setToggleCreateBoard} loading={loading} />} />
+        <Route   path=':id' element={< BoardDetails setToggleCreateBoard= {setToggleCreateBoard} />}  />
         </Route>
       </Routes>
 

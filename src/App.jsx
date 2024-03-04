@@ -5,12 +5,10 @@ import './App.css'
 import { ChakraProvider } from '@chakra-ui/react'
 import Project from './Project'
 function App() {
-  const [count, setCount] = useState(0)
 
   return (
     <>
           <ChakraProvider>
-             {/* <Modal/>  */}
             <Project/>
           </ChakraProvider>
   

@@ -15,10 +15,12 @@ import {
   InputLeftElement,
 } from "@chakra-ui/react";
 import ListCards from "../ListCards/ListCards";
-const BoardDetails = ({ listId }) => {
+import Loading from "../Loading/Loading";
+const BoardDetails = ({ listId , setToggleCreateBoard }) => {
   const [listName, setListName] = useState("");
   const [boardDetails, setBoardDetails] = useState([]);
   const [listCard, setListCard] = useState([]);
+  const[loading , setLoading] = useState(false);
   const myApiKey = import.meta.env.VITE_API_KEY;
   const myToken = import.meta.env.VITE_TOKEN;
   const { id } = useParams();
@@ -28,6 +30,8 @@ const BoardDetails = ({ listId }) => {
       `https://api.trello.com/1/boards/${id}/lists?key=${myApiKey}&token=${myToken}`
     );
     setBoardDetails(res.data);
+    setLoading(true);
+    setToggleCreateBoard(false);
   }
 
   async function handlingDeleteTheList(listId) {
@@ -54,34 +58,45 @@ const BoardDetails = ({ listId }) => {
   return (
     <Box background={"#878deb33"} minH={"100vh"} paddingTop={'50px'}>
       <Box width={'90%'} margin={'auto'}>
-      <Flex scrollBehavior={"inherit"} gap={"20px"} flexWrap={'wrap'}>
-        {boardDetails.map((curr) => (
-          <>
-            <Flex>
-              <Card height="fit-content">
-                <CardHeader>
-                  <Flex justifyContent={"space-between"}>
-                    <Heading size="md"> {curr.name} </Heading>
-                    <Button onClick={() => handlingDeleteTheList( curr.id)}>
-                      Delete
-                    </Button>
-                  </Flex>
-                </CardHeader>
-                <CardBody>
-                  <ListCards listId={curr.id}  />
-                </CardBody>
-              </Card>
-            </Flex>
-          </>
-        ))}
+      <Flex  scrollBehavior={"inherit"}  gap={"20px"} width={'100%'} overflowX={'auto'} >
+      {
 
+        loading ?
+        (
+
+          boardDetails.map((curr) => (
+            <>
+              <Flex    >
+                <Card width={'383px'} height="fit-content">
+                  <CardHeader>
+                    <Flex justifyContent={"space-between"}>
+                      <Heading size="md"> {curr.name} </Heading>
+                      <Button onClick={() => handlingDeleteTheList( curr.id)}>
+                        Delete
+                      </Button>
+                    </Flex>
+                  </CardHeader>
+                  <CardBody>
+                    <ListCards listId={curr.id}  />
+                  </CardBody>
+                </Card>
+              </Flex>
+            </>
+          ))
+  
+        ):
+        <Loading />
+
+
+      }
         <Card height={"fit-content"}>
           <Textarea
             onChange={(e) => setListName(e.target.value)}
+            width={'250px'}
             placeholder="Add Another List"
           />
-          <CardFooter>
-            <Button onClick={addNewList}>Add List</Button>
+          <CardFooter width={'250px'}>
+            <Button width={'250px'} onClick={addNewList}>Add List</Button>
           </CardFooter>
         </Card>
       </Flex>

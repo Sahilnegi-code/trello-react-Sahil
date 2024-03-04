@@ -20,10 +20,29 @@ const CheckItem = ({ checkListId  , cardId}) => {
   const [isChecked, setIsChecked] = useState(false);
   const myApiKey = import.meta.env.VITE_API_KEY;
   const myToken = import.meta.env.VITE_TOKEN;
+  console.log(checkItemData);
 
 
-  const handleCheckboxChange = () => {
-    // setIsChecked(!isChecked);
+  const handleCheckboxChange = async (checkItem , state) => {
+    
+        let tempCheckItemData = checkItemData.map((curr)=>{
+
+            if( curr.id  ===  checkItem ){
+                return {
+                    ...curr , state : state === 'incomplete' ? 'complete':'incomplete' 
+                }
+            }
+return curr;
+
+           }   )
+    
+    
+           setCheckItemsData(tempCheckItemData);
+        //    setIsChecked(  )
+const res = await axios.put(`https://api.trello.com/1/cards/${cardId}/checklist/${checkListId}/checkItem/${checkItem}?key=${myApiKey}&token=${myToken}&state=${  state === 'incomplete' ? 'complete' : 'incomplete'}`);
+const data = res.data ;
+console.log(data);
+
   };
 
 
@@ -46,6 +65,7 @@ const CheckItem = ({ checkListId  , cardId}) => {
       `https://api.trello.com/1/checklists/${checkListId}/checkItems?key=${myApiKey}&token=${myToken}`
     );
     const data = res.data;
+    console.log(checkItemData);
     setCheckItemsData(data);
   }
   useEffect(() => {
@@ -60,8 +80,9 @@ const CheckItem = ({ checkListId  , cardId}) => {
               <Flex gap={'10px'}>
               <input
           type="checkbox"
-          checked={isChecked}
-          onChange={handleCheckboxChange}
+          checked={curr.state === 'incomplete'?false :true}
+          onChange={ ()=> handleCheckboxChange(curr.id , curr.state  )
+        }
         />
         <Text> {curr.name} </Text>
         
