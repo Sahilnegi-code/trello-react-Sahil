@@ -30,13 +30,14 @@ const CreateBoard = () => {
           <PopoverCloseButton />
 
           <PopoverBody>
-            <FormLabel>Board Title</FormLabel>
-
-            <Input type="text" onChange={handlingBoardName} />
-            <Button onClick={addInTheBoard} mt={"10px"} height={"34px"}>
-              {" "}
-              create
-            </Button>
+            <form onSubmit={addInTheBoard}>
+              <FormLabel>Board Title</FormLabel>
+              <Input type="text" onChange={handlingBoardName} />
+              <Button type="submit" mt={"10px"} height={"34px"}>
+                {" "}
+                Create{" "}
+              </Button>
+            </form>
           </PopoverBody>
         </PopoverContent>
       </Popover>
