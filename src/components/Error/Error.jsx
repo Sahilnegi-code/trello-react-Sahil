@@ -10,7 +10,9 @@ import {
 const Error = ({objStyle , alertStyle , boxStyle}) => {
   return (
     <>
+
       <Alert status="error" style={boxStyle} >
+        
         <AlertIcon
         style = {alertStyle}
           height={"30px"}
@@ -24,6 +26,7 @@ const Error = ({objStyle , alertStyle , boxStyle}) => {
           </Heading>
         </Box>
       </Alert>
+      
     </>
   );
 };

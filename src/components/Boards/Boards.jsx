@@ -7,7 +7,6 @@ import Error from "../Error/Error";
 
 const Boards = ({ loading, setToggleCreateBoard, errorState }) => {
   const { fetchTheBoards, boardData } = useContext(themeContext);
-  console.log("Error State -> ", errorState);
   useEffect(() => {
     fetchTheBoards();
   }, []);

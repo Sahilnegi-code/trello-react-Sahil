@@ -1,8 +1,6 @@
-import React, { useState, useEffect } from "react";
-import { PhoneIcon, AddIcon, WarningIcon, CloseIcon } from "@chakra-ui/icons";
+import React, { useState, useReducer } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faSquareCheck } from "@fortawesome/free-solid-svg-icons";
-// import {} from ''
 import {
   Text,
   Popover,
@@ -10,17 +8,10 @@ import {
   PopoverContent,
   PopoverArrow,
   PopoverCloseButton,
-  PopoverHeader,
   FormControl,
   FormLabel,
-  Box,
   Flex,
-  InputLeftElement,
-  InputRightElement,
-  InputGroup,
   Input,
-  list,
-  CardFooter,
   Button,
   Modal,
   ModalOverlay,
@@ -29,30 +20,85 @@ import {
   ModalFooter,
   ModalBody,
   PopoverBody,
-  ModalCloseButton,
-  useDisclosure,
+
 } from "@chakra-ui/react";
 import axios from "axios";
 import CheckList from "../CheckList/CheckList";
-import Loading from "../Loading/Loading";
 import Error from "../Error/Error";
-const DisplayModal = ({ handleCloseModal, isOpen, cardId }) => {
-  const [checkListName, setCheckListName] = useState("");
-  const [checkListData, setCheckListData] = useState([]);
-  const [errorState, setErrorState] = useState(false);
 
+const initialState = {
+  checkListData:[],
+  errorState :false,
+
+};
+const reducer = (state , action ) => {
+
+
+  switch (action.type){
+
+    case 'SET_CHECKLIST_DATA':
+  
+              return {
+                ...state , 
+                checkListData : [ ...state.checkListData , action.payload ]
+              };
+    
+      case  'GET_CHECKLIST_DATA':
+
+      return {
+        ...state , 
+        checkListData :[...action.payload]
+      };
+    case  'FAIL_CHECKLIST_DATA':
+
+    return {
+      ...state , 
+      errorState:true
+    };
+  }
+
+
+
+
+}
+
+const DisplayModal = ({ handleCloseModal, isOpen, cardId }) => {
+
+  const [checkListName, setCheckListName] = useState("");
+  const [{ checkListData, errorState }, dispatch] = useReducer(
+    reducer,
+    initialState
+  );
   const myApiKey = import.meta.env.VITE_API_KEY;
   const myToken = import.meta.env.VITE_TOKEN;
-  async function addCheckListInCard() {
+
+  async function addCheckListInCard(e) {
+    e.preventDefault();
     try {
       const res = await axios.post(
         `https://api.trello.com/1/cards/${cardId}/checklists?key=${myApiKey}&token=${myToken}&name=${checkListName}`
       );
       const data = res.data;
-      setCheckListData([data, ...checkListData]);
-    } catch (err) {
-      setErrorState(true);
+
+      dispatch({
+
+        type :'SET_CHECKLIST_DATA',
+        payload : data
+
+      });
+    } 
+    catch (err) {
+
+
+      dispatch({
+
+        type: 'FAIL_CHECKLIST_DATA'
+
+      })
+
+
     }
+
   }
 
   return (
@@ -81,10 +127,15 @@ const DisplayModal = ({ handleCloseModal, isOpen, cardId }) => {
               </ModalHeader>
 
               <ModalBody>
+
                 <CheckList
                   cardId={cardId}
                   checkListname={checkListName}
-                  setCheckListData={setCheckListData}
+                  setCheckListData={(data , actionType) =>
+                    {
+                      dispatch({type:actionType, payload:data})
+                    }
+              }
                   checkListData={checkListData}
                 />
 
@@ -93,23 +144,27 @@ const DisplayModal = ({ handleCloseModal, isOpen, cardId }) => {
                   <PopoverCloseButton />
 
                   <PopoverBody>
+
                     <FormControl>
+
                       <form onSubmit={addCheckListInCard}>
                         <FormLabel>Title</FormLabel>
                         <Input
                           onChange={(e) => setCheckListName(e.target.value)}
                         />
                         <Button
-                          colorScheme="blue"
+         
                           size={"sm"}
                           mt={"15px"}
                           type="submit"
                           onClose={true}
-                        >
+                          >
                           Add
                         </Button>
                       </form>
                     </FormControl>
+
+                     
                   </PopoverBody>
                 </PopoverContent>
               </ModalBody>

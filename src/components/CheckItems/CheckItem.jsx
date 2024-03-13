@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect , useReducer} from "react";
 
 import {
   Box,
@@ -15,19 +15,96 @@ import Error from "../Error/Error";
 import axios from "axios";
 import CheckList from "../CheckList/CheckList";
 import Loading from "../Loading/Loading";
-const CheckItem = ({ checkListId, cardId }) => {
-  const [toggleAddItem, setToggleAddItem] = useState(true);
-  const [checkItemName, setCheckItemName] = useState("");
-  const [checkItemData, setCheckItemsData] = useState([]);
-  const [isChecked, setIsChecked] = useState(false);
-  const [checkItemLoading, setCheckItemLoading] = useState(false);
-  const [errorState, setErrorState] = useState(false);
 
+const reducer = ( state ,action  ) =>{
+
+
+
+
+  switch(action.type){
+
+    case 'FETCH_CHECKITEMS_SUCCESS':
+
+      return {
+        ...state
+         ,
+         checkItemData : action.payload
+    };
+
+    case 'FETCH_CHECKITEMS_FAILED':
+
+      return {
+        ...state,
+        errorState :true
+      };
+    
+    case 'Delete_Item_Success':
+      return {
+        ...state , 
+        checkItemData :  state.checkItemData.filter( (curr) => curr.id !== action.payload )
+      };
+
+    case 'Delete_Item_Failed':  
+
+      return {
+        ...state ,
+        errorState: false
+      };
+
+    case 'ADD_ITEM_FAILED':
+
+    return {
+      ...state , 
+      errorState : true
+    };
+
+    case 'ADD_ITEM_SUCCESS':
+
+      return{
+
+        ...state , 
+        checkItemData :[...state.checkItemData , action.payload ]
+      };
+
+
+    default:
+      return state;  
+
+
+  }
+
+
+
+
+}
+
+
+
+const initialState = {
+  checkItemData: [],
+  checkItemName: "",
+  toggleAddItem: true,
+  checkItemLoading: false,
+  errorState: false
+};
+
+
+
+const CheckItem = ({ checkListId, cardId }) => {
+
+const[ state , dispatch  ] = useReducer(reducer , initialState);
+  const { checkItemData, checkItemLoading, errorState } = state;
+  const [ checkItemName , setCheckItemName ] = useState("")
+  const [ toggleAddItem , setToggleAddItem] = useState(false);
   const myApiKey = import.meta.env.VITE_API_KEY;
   const myToken = import.meta.env.VITE_TOKEN;
-  console.log(checkItemData);
+  
 
-  const handleCheckboxChange = async (checkItem, state) => {
+   const handleCheckboxChange = async (checkItem, state) => {
+
+
+    try {
+
     let tempCheckItemData = checkItemData.map((curr) => {
       if (curr.id === checkItem) {
         return {
@@ -38,60 +115,84 @@ const CheckItem = ({ checkListId, cardId }) => {
       return curr;
     });
 
-    setCheckItemsData(tempCheckItemData);
-
-    try {
+    dispatch({
+      type: 'FETCH_CHECKITEMS_SUCCESS',
+      payload : tempCheckItemData
+    })
+    
       const res = await axios.put(
         `https://api.trello.com/1/cards/${cardId}/checklist/${checkListId}/checkItem/${checkItem}?key=${myApiKey}&token=${myToken}&state=${
           state === "incomplete" ? "complete" : "incomplete"
         }`
       );
+
+
     } catch (err) {
-      setErrorState(true);
+      dispatch({
+        type  : 'FETCH_CHECKITEMS_FAILED'
+      })
     }
-  };
+
+
+
+};
+
 
   async function handleAddItem(e) {
+    
     e.preventDefault();
     try {
-      const res = await axios.post(
-        `https://api.trello.com/1/checklists/${checkListId}/checkItems?name=${checkItemName}&key=${myApiKey}&token=${myToken}`
-      );
+
+    const res = await axios.post(
+    `  
+    https://api.trello.com/1/checklists/${checkListId}/checkItems?name=${checkItemName}&key=${myApiKey}&token=${myToken}
+
+    `
+    );
+
       const data = res.data;
 
-      setCheckItemsData([data, ...checkItemData]);
+
+      dispatch({
+
+        type  : 'ADD_ITEM_SUCCESS' ,
+        payload : data
+
+      });
+
+
+
     } catch (err) {
-      setErrorState(true);
-      console.log("Error");
+      dispatch({type : 'ADD_ITEM_FAILED'})
     }
   }
 
   async function handleDeleteItem(checkItemId) {
+
     try {
       const res = await axios.delete(
         `https://api.trello.com/1/checklists/${checkListId}/checkItems/${checkItemId}?key=${myApiKey}&token=${myToken}`
       );
       const data = res.data;
-      setCheckItemsData(
-        checkItemData.filter((curr) => curr.id !== checkItemId)
-      );
+      dispatch({type : 'Delete_Item_Success' , payload : checkItemId});
+
+     
     } catch (err) {
-      setErrorState(true);
+      dispatch({type : 'Delete_Item_Failed' })
     }
   }
 
   async function getAllcheckItems() {
     try {
-      setCheckItemLoading(true);
+
       const res = await axios.get(
         `https://api.trello.com/1/checklists/${checkListId}/checkItems?key=${myApiKey}&token=${myToken}`
       );
       const data = res.data;
-      console.log(checkItemData);
-      setCheckItemsData(data);
-      setCheckItemLoading(false);
+ 
+      dispatch({type : 'FETCH_CHECKITEMS_SUCCESS' , payload : data })
     } catch (err) {
-      setErrorState(true);
+      dispatch({type:'FETCH_CHECKITEMS_FAILED'})
     }
   }
 
@@ -139,39 +240,42 @@ const CheckItem = ({ checkListId, cardId }) => {
       )}
 
       {toggleAddItem ? (
-        <Button
-          size="xs"
-          m={"20px 0px"}
-          onClick={() => setToggleAddItem(false)}
-        >
-          Add Item
-        </Button>
+
+<>
+<form onSubmit={handleAddItem}>
+  <FormControl>
+    <Input
+      type="text"
+      onChange={(e) => setCheckItemName(e.target.value)}
+    />
+    <Flex height={"50px"} alignItems={"center"}>
+      <Button size="xs" type="submit">
+        Add Item
+      </Button>
+      <Button
+        size="xs"
+        ml={"10px"}
+        onClick={() =>   setToggleAddItem(false)}
+      >
+        Close
+      </Button>
+    </Flex>
+  </FormControl>
+</form>
+</>
+      
       ) : (
-        <>
-          <form onSubmit={handleAddItem}>
-            <FormControl>
-              <Input
-                type="text"
-                onChange={(e) => setCheckItemName(e.target.value)}
-              />
-              <Flex height={"50px"} alignItems={"center"}>
-                <Button size="xs" type="submit">
-                  Add Item
-                </Button>
-                <Button
-                  size="xs"
-                  ml={"10px"}
-                  onClick={() => setToggleAddItem(true)}
-                >
-                  Close
-                </Button>
-              </Flex>
-            </FormControl>
-          </form>
-        </>
+        <Button
+        size="xs"
+        m={"20px 0px"}
+        onClick={() => setToggleAddItem(true)}
+      >
+        Add Item
+      </Button>
       )}
     </>
   );
 };
+
 
 export default CheckItem;

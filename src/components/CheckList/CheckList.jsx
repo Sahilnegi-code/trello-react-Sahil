@@ -1,67 +1,94 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect , useReducer} from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faSquareCheck } from "@fortawesome/free-solid-svg-icons";
 import {
   Box,
   Text,
-  Button,
   Flex,
-  Popover,
-  PopoverTrigger,
-  PopoverContent,
-  PopoverArrow,
-  PopoverCloseButton,
-  PopoverHeader,
-  PopoverBody,
-  FormControl,
-  FormLabel,
-  FormHelperText,
-  Input,
+
 } from "@chakra-ui/react";
 import CheckItem from "../CheckItems/CheckItem";
 import axios from "axios";
 import Error from "../Error/Error";
 import Loading from "../Loading/Loading";
+
+const initialState = {
+  loadingCheckList :true,
+  errorState :false,
+}
+
+const reducer = (state , action) =>{
+
+  switch(action.type){
+    case 'GET_CHECKLIST_SUCCESS':
+      return {
+        ...state ,
+loadingCheckList:false,
+errorState: false
+      };
+
+    case  'GET_CHECKLIST_FAILED':
+
+    return {
+      ...state, 
+      loadingCheckList :false,
+      errorState:true
+    }
+
+  }
+
+}
+
 const CheckList = ({
   cardId,
-  checkListName,
-  setCheckListData,
   checkListData,
+  setCheckListData
 }) => {
+
   const myApiKey = import.meta.env.VITE_API_KEY;
   const myToken = import.meta.env.VITE_TOKEN;
-  const [loadingCheckList, setLoadingCheckList] = useState(false);
-  const [errorState, setErrorState] = useState(false);
+  const [ {loadingCheckList,errorState } , dispatch] = useReducer(  reducer , initialState  );
+  
+
   async function handlingGetCheckList() {
     try {
-      setLoadingCheckList(true);
       const res = await axios.get(
         `https://api.trello.com/1/cards/${cardId}/checklists?key=${myApiKey}&token=${myToken}`
       );
       const data = res.data;
-      setCheckListData(data);
-      setLoadingCheckList(false);
+      console.log(data);
+    setCheckListData(data , 'GET_CHECKLIST_DATA');
+    dispatch({type :'GET_CHECKLIST_SUCCESS'});
+  
     } catch (err) {
-      setLoadingCheckList(false);
-      setErrorState(true);
+console.log('checklist error');
+      dispatch({type :'GET_CHECKLIST_FAILED'})
+
     }
   }
+  
+console.log(errorState , checkListData);
 
-  console.log();
+
   useEffect(() => {
     handlingGetCheckList();
   }, []);
   return (
     <>
-      {errorState ? (
+      {
+      errorState 
+      ?
+      (
         <Error />
-      ) : (
+      ) :
+      (
         <Box>
           {loadingCheckList ? (
             <Loading />
           ) : (
             <Flex flexDirection={"column"} gap={"30px"}>
-              {checkListData.map((curr) => (
+              {
+              checkListData.map((curr) => (
                 <Box>
                   <Text>
                     <FontAwesomeIcon
@@ -74,6 +101,7 @@ const CheckList = ({
 
                   <Box>
                     <CheckItem cardId={cardId} checkListId={curr.id} />
+                   
                   </Box>
                 </Box>
               ))}

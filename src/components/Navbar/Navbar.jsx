@@ -1,10 +1,13 @@
 import React from "react";
+
 import CreateBoard from "../CreateBoard/CreateBoard";
-import { Image, Box, Heading, Flex, Container } from "@chakra-ui/react";
+
+import { Image, Box, Heading, Flex } from "@chakra-ui/react";
+
 import { useParams } from "react-router-dom";
+
 const Navbar = ({ toggleCreateBoard }) => {
   const { id } = useParams();
-  console.log(id);
   return (
     <Box background={"#b187eb"} height={"120px"}>
       <Box width={"90%"} margin={"auto"} height={"100%"}>
@@ -39,5 +42,4 @@ const Navbar = ({ toggleCreateBoard }) => {
   );
 };
 
-// export default Navbar;
 export default Navbar;

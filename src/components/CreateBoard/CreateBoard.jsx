@@ -10,14 +10,18 @@ import {
   PopoverBody,
   FormLabel,
   Input,
-} from "@chakra-ui/react";
-import axios from "axios";
+} 
+from 
+"@chakra-ui/react";
+
 import { themeContext } from "../../Project";
 const CreateBoard = () => {
+
   const { handlingBoardName, addInTheBoard } = useContext(themeContext);
 
   return (
     <>
+
       <Popover>
         <PopoverTrigger>
           <Button color={"white"} background="#8c00ff38" height="44px">
@@ -35,13 +39,16 @@ const CreateBoard = () => {
               <Input type="text" onChange={handlingBoardName} />
               <Button type="submit" mt={"10px"} height={"34px"}>
                 {" "}
-                Create{" "}
+                Create
+                {" "}
               </Button>
             </form>
           </PopoverBody>
         </PopoverContent>
       </Popover>
+      
     </>
+
   );
 };
 
