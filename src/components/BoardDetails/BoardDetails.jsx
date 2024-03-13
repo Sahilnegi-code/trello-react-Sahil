@@ -2,7 +2,6 @@ import axios from "axios";
 import React, { useState, useEffect , useReducer} from "react";
 import { useParams } from "react-router-dom";
 import { Card, Box, Flex, Textarea, InputGroup } from "@chakra-ui/react";
-
 import {
   CardHeader,
   CardBody,
@@ -41,8 +40,6 @@ const reducer = (state  , action ) => {
     }
 
     case 'DELETE_LIST_SUCCESS':
-    
-
 
       return {
         ...state , 
@@ -137,9 +134,11 @@ const BoardDetails = ({ listId, setToggleCreateBoard }) => {
       dispatch( {type : 'ADD_LIST_FAILED'})
     }
   }
-  useEffect(() => {
+  
+   useEffect(() => {
     fetchBoardDetails(id);
   }, []);
+
   return (
     <Box background={"#878deb33"} minH={"100vh"} paddingTop={"50px"}>
       <Box width={"90%"} margin={"auto"}>
