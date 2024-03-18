@@ -1,10 +1,8 @@
 import React from "react";
-import { Heading, Box, Text, Flex } from "@chakra-ui/react";
+import { Heading, Box} from "@chakra-ui/react";
 import {
   Alert,
   AlertIcon,
-  AlertTitle,
-  AlertDescription,
 } from "@chakra-ui/react";
 const RouteError = () => {
   return (

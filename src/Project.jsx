@@ -6,53 +6,26 @@ import BoardDetails from "./components/BoardDetails/BoardDetails";
 import axios from "axios";
 import { BrowserRouter, Route, Routes } from "react-router-dom";
 import RouteError from "./components/RouteError/RouteError";
-
+import { useDispatch, useSelector } from "react-redux";
+import {
+addInBoard , addBoardFailed ,FETCH_BOARD_SUCCESS ,
+FETCH_BOARD_FAILED
+} from "./Store/Slices/BoardSlice";
 export const themeContext = createContext(null);
 
-const initialState = {
-  loading: true,
-  boardData: [],
-  errorState: false,
-};
 
-const reducer = (state, action) => {
-  switch (action.type) {
-    case "FETCH_BOARD_SUCCESS":
-      return {
-        ...state,
-        boardData: action.payload,
-        loading: false,
-      };
-
-    case "FETCH_BOARD_FAILED":
-      return {
-        ...state,
-        loading: false,
-        errorState: true,
-      };
-
-    case "ADD_BOARD_SUCCESS":
-      return {
-        ...state,
-        boardData: [...state.boardData, action.payload],
-      };
-    case "ADD_BOARD_FAILED":
-      return {
-        ...state,
-        errorState: true,
-      };
-  }
-};
 
 const Project = () => {
   const [boardName, setBoardName] = useState("");
   const [toggleCreateBoard, setToggleCreateBoard] = useState(true);
-  const [{ loading, boardData, errorState }, dispatch] = useReducer(
-    reducer,
-    initialState
-  );
+
+  const  {  loading, boardData, errorState } = useSelector((state ) => {
+return state.boards;
+  });
   const myApiKey = import.meta.env.VITE_API_KEY;
   const myToken = import.meta.env.VITE_TOKEN;
+  const dispatch = useDispatch();
+
   function handlingBoardName(event) {
     setBoardName(event.target.value);
   }
@@ -63,10 +36,10 @@ const Project = () => {
       const res = await axios.get(
         `https://api.trello.com/1/members/me/boards?key=${myApiKey}&token=${myToken}`
       );
-      dispatch({ type: "FETCH_BOARD_SUCCESS", payload: res.data });
+      dispatch(  FETCH_BOARD_SUCCESS(res.data));
       setToggleCreateBoard(true);
     } catch (err) {
-      dispatch({ type: "FETCH_BOARD_FAILED" });
+      dispatch( FETCH_BOARD_FAILED() );
     }
 
 
@@ -83,15 +56,15 @@ const Project = () => {
 
       const newData = response.data;
 
-      dispatch({
-        type: "ADD_BOARD_SUCCESS"
-        ,
-        payload: newData,
-      });
+      dispatch(addInBoard(newData));
     } catch (err) {
-      dispatch({ type: "ADD_BOARD_FAILED" });
+      dispatch(addBoardFailed());
     }
   }
+
+
+
+
 
   return (
     <>

@@ -25,52 +25,19 @@ import {
 import axios from "axios";
 import CheckList from "../CheckList/CheckList";
 import Error from "../Error/Error";
-
-const initialState = {
-  checkListData:[],
-  errorState :false,
-
-};
-const reducer = (state , action ) => {
+import { useDispatch, useSelector } from "react-redux";
+import {
+  SET_CHECKLIST_DATA , GET_CHECKLIST_DATA  , FAIL_CHECKLIST_DATA ,
+  } from "../../Store/Slices/DisplayModelSlice";
 
 
-  switch (action.type){
-
-    case 'SET_CHECKLIST_DATA':
-  
-              return {
-                ...state , 
-                checkListData : [ ...state.checkListData , action.payload ]
-              };
-    
-      case  'GET_CHECKLIST_DATA':
-
-      return {
-        ...state , 
-        checkListData :[...action.payload]
-      };
-    case  'FAIL_CHECKLIST_DATA':
-
-    return {
-      ...state , 
-      errorState:true
-    };
-  }
-
-
-
-
-}
 
 const DisplayModal = ({ handleCloseModal, isOpen, cardId }) => {
-
   const [checkListName, setCheckListName] = useState("");
-  const [{ checkListData, errorState }, dispatch] = useReducer(
-    reducer,
-    initialState
-  );
+  const  {   checkListData,errorState   } = useSelector(state => state.displayModalSliceModal); 
   const myApiKey = import.meta.env.VITE_API_KEY;
   const myToken = import.meta.env.VITE_TOKEN;
+  const dispatch = useDispatch();
 
   async function addCheckListInCard(e) {
     e.preventDefault();
@@ -80,27 +47,15 @@ const DisplayModal = ({ handleCloseModal, isOpen, cardId }) => {
       );
       const data = res.data;
 
-      dispatch({
-
-        type :'SET_CHECKLIST_DATA',
-        payload : data
-
-      });
+      dispatch(SET_CHECKLIST_DATA(data));
     } 
     catch (err) {
 
-
-      dispatch({
-
-        type: 'FAIL_CHECKLIST_DATA'
-
-      })
-
+      dispatch(FAIL_CHECKLIST_DATA())
 
     }
 
   }
-
   return (
     <>
       {errorState ? (
@@ -133,7 +88,7 @@ const DisplayModal = ({ handleCloseModal, isOpen, cardId }) => {
                   checkListname={checkListName}
                   setCheckListData={(data , actionType) =>
                     {
-                      dispatch({type:actionType, payload:data})
+                      dispatch(GET_CHECKLIST_DATA(data))
                     }
               }
                   checkListData={checkListData}

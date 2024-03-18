@@ -4,7 +4,6 @@ import { useParams } from "react-router-dom";
 
 const Loading = ({ style }) => {
   const { id } = useParams();
-  console.log(id);
   let obj = {
     listLoading: {
       justifyContent: "center",

@@ -1,7 +1,16 @@
 import axios from "axios";
-import React, { useState, useEffect , useReducer} from "react";
+import React, { useState, useEffect, useReducer } from "react";
 import { useParams } from "react-router-dom";
 import { Card, Box, Flex, Textarea, InputGroup } from "@chakra-ui/react";
+import {
+  ADD_LIST_SUCCESS,
+  ADD_LIST_FAILED,
+  FETCH_BOARD_DETAILS_SUCCESS,
+  DELETE_LIST_SUCCESS,
+  DELETE_LIST_FAILED,
+  FETCH_BOARD_DETAILS_FAILED,
+} from "../../Store/Slices/BoardDetailsSlice";
+import { useDispatch, useSelector } from "react-redux";
 
 import {
   CardHeader,
@@ -14,90 +23,30 @@ import ListCards from "../ListCards/ListCards";
 import Loading from "../Loading/Loading";
 import Error from "../Error/Error";
 
-const initialState = {
-
-  boardDetails :[],
-  listCard :[],
-  loading : true,
-  errorState:false,
-
-}
-
-const reducer = (state  , action ) => {
-
-  switch(action.type){
-
-    case 'FETCH_BOARD_SUCCESS':
-    return {
-      loading :false ,
-      boardDetails : action.payload,
-    }
-
-    case 'FETCH_BOARD_FAILED':
-
-    return {
-      loading : false,
-      errorState : true
-    }
-
-    case 'DELETE_LIST_SUCCESS':
-    
-
-
-      return {
-        ...state , 
-        boardDetails:state.boardDetails.filter(({ id }) => id !== action.payload)
-      }
-
-      case 'DELETE_LIST_FAILED':
-      case 'ADD_LIST_FAILED':
-
-      return {
-        ...state , 
-        errorState:true 
-      }
-
-      case 'ADD_LIST_SUCCESS':
-
-      return {
-        ...state ,
-        boardDetails : [...state.boardDetails , action.payload],
-        loadingNewList : false
-      };
-
-  }
-}
-
 const BoardDetails = ({ listId, setToggleCreateBoard }) => {
-
   const [loadingNewList, setLoadingNewList] = useState(false);
-  const [listName , setListName ] = useState("");
+  const [listName, setListName] = useState("");
 
+  const { boardDetails, loading, errorState } = useSelector(
+    (state) => state.boardDetails
+  );
 
-  const [{ 
-  boardDetails ,
-  listCard ,
-  loading ,
-  errorState}, dispatch ] = useReducer(reducer, initialState  ); 
+  const dispatch = useDispatch();
   const myApiKey = import.meta.env.VITE_API_KEY;
   const myToken = import.meta.env.VITE_TOKEN;
   const { id } = useParams();
 
   async function fetchBoardDetails(id) {
     try {
-
       const res = await axios.get(
         `https://api.trello.com/1/boards/${id}/lists?key=${myApiKey}&token=${myToken}`
       );
 
-
-
-      dispatch({ type : 'FETCH_BOARD_SUCCESS' , payload  : res.data});
-
+      dispatch(FETCH_BOARD_DETAILS_SUCCESS(res.data));
 
       setToggleCreateBoard(false);
     } catch (err) {
-      dispatch({ type : 'FETCH_BOARD_FAILED' });
+      dispatch(FETCH_BOARD_DETAILS_FAILED());
     }
   }
 
@@ -109,14 +58,10 @@ const BoardDetails = ({ listId, setToggleCreateBoard }) => {
 
       const data = res.data;
 
-      dispatch({type : 'DELETE_LIST_SUCCESS' , payload :  data.id });
-
+      dispatch(DELETE_LIST_SUCCESS(data.id));
     } catch (err) {
-
-      dispatch({type : 'DELETE_LIST_FAILED'})
-
+      dispatch(DELETE_LIST_FAILED());
     }
-
   }
 
   async function addNewList() {
@@ -127,14 +72,11 @@ const BoardDetails = ({ listId, setToggleCreateBoard }) => {
         `https://api.trello.com/1/boards/${id}/lists?name=${listName}&key=${myApiKey}&token=${myToken}`
       );
 
-
-
       setLoadingNewList(false);
 
-      dispatch({type : 'ADD_LIST_SUCCESS' , payload : res.data });
-
+      dispatch(ADD_LIST_SUCCESS(res.data));
     } catch (err) {
-      dispatch( {type : 'ADD_LIST_FAILED'})
+      dispatch(ADD_LIST_FAILED());
     }
   }
   useEffect(() => {

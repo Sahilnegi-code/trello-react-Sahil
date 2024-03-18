@@ -4,14 +4,19 @@ import viteLogo from '/vite.svg'
 import './App.css'
 import { ChakraProvider } from '@chakra-ui/react'
 import Project from './Project'
+import {Provider} from 'react-redux';
+import store from './Store/store'
 function App() {
 
   return (
     <>
-          <ChakraProvider>
-            <Project/>
-          </ChakraProvider>
+    <Provider store={ store }>
+    <ChakraProvider>
+      <Project/>
+    </ChakraProvider>
   
+    </Provider>
+      
     </>
   )
 }

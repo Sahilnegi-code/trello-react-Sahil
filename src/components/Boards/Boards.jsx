@@ -5,7 +5,7 @@ import { Link } from "react-router-dom";
 import Loading from "../Loading/Loading";
 import Error from "../Error/Error";
 
-const Boards = ({ loading, setToggleCreateBoard, errorState }) => {
+const Boards = ({ loading, errorState }) => {
   const { fetchTheBoards, boardData } = useContext(themeContext);
   useEffect(() => {
     fetchTheBoards();
